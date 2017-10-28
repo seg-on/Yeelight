@@ -3,6 +3,11 @@ using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using System.Net;
+using System.ComponentModel;
+using System.Device.Location;
+using System.Globalization;
+using System.Web.Script.Serialization;
+
 
 namespace YeelightTray
 {
@@ -48,7 +53,7 @@ namespace YeelightTray
             trayIcon = new NotifyIcon();
             trayIcon.Text = "Yeelight";
             //trayIcon.Icon = new Icon(SystemIcons.Application, 40, 40);
-            trayIcon.Icon = new Icon(Properties.Resources.yeelight_win_on, 40, 40);
+            trayIcon.Icon = new Icon(OnOff ? Properties.Resources.yeelight_win_on : Properties.Resources.yeelight_win_off, 40, 40);
             //trayIcon.Icon = new Icon((device.State) ? Properties.Resources.yeelight_win_on : Properties.Resources.yeelight_win_off, 40, 40);
             trayIcon.MouseClick += new MouseEventHandler(OnMouseClick);
 
@@ -159,14 +164,19 @@ namespace YeelightTray
 
         private void SunTime()
         {
+            GeoCoordinate locality = new GeoCoordinate();
+            //Piestany
+            locality.Latitude = 48.584167;
+            locality.Longitude = 17.833611;
+
             DateTime civil_twilight_end = DateTime.Now.AddMinutes(1);
             string Today = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString();
-            var json = new WebClient().DownloadString("https://api.sunrise-sunset.org/json?lat=48.584167&lng=-17.833611&date=" + Today);
-            int cte = json.IndexOf("civil_twilight_end");
-            string scte = json.Substring(cte + 21, 10);
-            civil_twilight_end = DateTime.Parse(scte);
+            string lat = locality.Latitude.ToString(CultureInfo.InvariantCulture);
+            string lon = locality.Longitude.ToString(CultureInfo.InvariantCulture);
+            string json = new WebClient().DownloadString("https://api.sunrise-sunset.org/json?lat=" + lat + "&lng=" + lon + "&date=" + Today);
+            SSAPI piestanyInfo = new JavaScriptSerializer().Deserialize<SSAPI>(json);
 
-            if (civil_twilight_end < DateTime.Now & !OnOff)
+            if (piestanyInfo.results.civil_twilight_end.ToLocalTime() < DateTime.Now & !OnOff)
             {
                 trayIcon.Icon = Properties.Resources.yeelight_win_on;
                 m_DeviceIO.Toggle();
@@ -174,5 +184,38 @@ namespace YeelightTray
             }
 
         }
+    }
+
+    public class SSAPI
+    {
+        public SunInfo results { get; set; }
+        public string status { get; set; }
+    }
+    public class SunInfo
+    {
+        public DateTime sunrise { get; set; }
+        public DateTime sunset { get; set; }
+        public DateTime solar_noon { get; set; }
+        public DateTime day_length { get; set; }
+        public DateTime civil_twilight_begin { get; set; }
+        public DateTime civil_twilight_end { get; set; }
+        public DateTime nautical_twilight_begin { get; set; }
+        public DateTime nautical_twilight_end { get; set; }
+        public DateTime astronomical_twilight_begin { get; set; }
+        public DateTime astronomical_twilight_end { get; set; }
+
+        public string PrintPropreties()
+        {
+            string allData = System.Environment.NewLine;
+            foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(this))
+            {
+                string name = descriptor.Name;
+                DateTime dValue = Convert.ToDateTime(descriptor.GetValue(this));
+                string value = dValue.ToLocalTime().ToString();
+                allData += name + ":" + value.PadLeft(50 - name.Length) + System.Environment.NewLine;
+            }
+            return allData;
+        }
+
     }
 }
