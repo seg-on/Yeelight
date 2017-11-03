@@ -7,7 +7,7 @@ using System.Net;
 
 namespace YeelightTray
 {
-    class Device : INotifyPropertyChanged
+    public class Device : INotifyPropertyChanged
     {
         //Default port
         private static int port = 55443;             

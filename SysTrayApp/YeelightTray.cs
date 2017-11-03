@@ -20,9 +20,9 @@ namespace YeelightTray
 
         private DevicesDiscovery m_DevicesDiscovery;
         private DeviceIO m_DeviceIO;
-        Device device;
-        static Timer myTimer = new Timer();
-
+        private Device device;
+        static Timer timerLock = new Timer();
+        static Timer timerStatus = new Timer();
 
         public YeelightTray()
         {
@@ -64,14 +64,33 @@ namespace YeelightTray
             SunTime();
 
             /* Adds the event and the event handler for the method that will 
-          process the timer event to the timer. */
-            myTimer.Tick += new EventHandler(TimerEventProcessor);
+            process the timer event to the timer. */
+            timerLock.Tick += new EventHandler(TimerLockEvent);
+            // Sets the timer interval to 2 minutes.
+            timerLock.Interval = 120000;
 
-            // Sets the timer interval to 5 seconds.
-            myTimer.Interval = 120000;
+            timerStatus.Tick += new EventHandler(TimerStatusEvent);
+            timerStatus.Interval = 10000;
+            timerStatus.Start();
 
             //Session Switch Event
             Microsoft.Win32.SystemEvents.SessionSwitch += new Microsoft.Win32.SessionSwitchEventHandler(SystemEvents_SessionSwitch);
+        }
+
+        private void TimerStatusEvent(object sender, EventArgs e)
+        {
+            if (device.State)
+            {
+                trayIcon.Icon = Properties.Resources.yeelight_win_on;
+                OnOff = true;
+            }
+            else
+            {
+                trayIcon.Icon = Properties.Resources.yeelight_win_off;
+                OnOff = false;
+            }
+
+            timerStatus.Start();
         }
 
         private void OnMouseClick(object sender, MouseEventArgs e)
@@ -91,8 +110,20 @@ namespace YeelightTray
                     m_DeviceIO.Toggle();
                     OnOff = true;
                 }
-                
             }
+            else if (e.Button == MouseButtons.Middle)
+            {
+                this.Activate();
+                BrightnessControlForm BSForm = new BrightnessControlForm(device);
+                BSForm.ShowDialog();
+        //m_DeviceIO.SetBrightness();
+    }
+            else if (e.Button == MouseButtons.None)
+            {
+                var brithness = device.Brightness;
+                //m_DeviceIO.SetBrightness();
+            }
+
         }
 
         protected override void OnLoad(EventArgs e)
@@ -113,7 +144,7 @@ namespace YeelightTray
             trayIcon.Visible = false;
             while (trayIcon.Visible != false)
             {
-                
+
             }
             if (isDisposing)
             {
@@ -140,7 +171,7 @@ namespace YeelightTray
         {
             if (e.Reason == SessionSwitchReason.SessionLock)
             {
-                if (device.State) myTimer.Start();
+                if (device.State) timerLock.Start();
             }
             else if (e.Reason == SessionSwitchReason.SessionUnlock)
             {
@@ -152,10 +183,9 @@ namespace YeelightTray
             }
         }
         // This is the method to run when the timer is raised.
-        private void TimerEventProcessor(Object myObject,
-                                                EventArgs myEventArgs)
+        private void TimerLockEvent(Object myObject, EventArgs myEventArgs)
         {
-            myTimer.Stop();
+            timerLock.Stop();
 
             trayIcon.Icon = Properties.Resources.yeelight_win_off;
             m_DeviceIO.Toggle();
