@@ -37,13 +37,19 @@ namespace YeelightTray
         /// </summary>
         private string m_Model;
 
-        public Device(string ip, string id, bool state, int bright, string model)
+        /// <summary>
+        /// Colour Temperature of the bulb
+        /// </summary>
+        private int m_ColourTemperature;
+
+        public Device(string ip, string id, bool state, int bright, string model, int ct)
         {
             m_Id = id;
             m_Ip = ip;
             m_State = state;
             m_Brightness = bright;
             m_Model = model;
+            m_ColourTemperature = ct;
         }
 
         public string Ip
@@ -97,6 +103,15 @@ namespace YeelightTray
                     default:
                         return null;                
                 }
+            }
+        }
+        public int ColourTemperature
+        {
+            get { return m_ColourTemperature; }
+            set
+            {
+                m_ColourTemperature = value;
+                OnPropertyChanged();
             }
         }
 

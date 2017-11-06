@@ -90,6 +90,19 @@ namespace YeelightTray
             m_TcpClient.Client.Send(data);
         }
 
+        public void SetColorTemperature(int value, int smooth)
+        {
+            StringBuilder cmd_str = new StringBuilder();
+            cmd_str.Append("{\"id\":");
+            cmd_str.Append(m_ConnectedBulb.Id);
+            cmd_str.Append(",\"method\":\"set_ct_abx\",\"params\":[");
+            cmd_str.Append(value);
+            cmd_str.Append(", \"smooth\", " + smooth + "]}\r\n");
+
+            byte[] data = Encoding.ASCII.GetBytes(cmd_str.ToString());
+            m_TcpClient.Client.Send(data);
+        }
+
         public void ExecCommand(string method, string param, int smooth)
         {
             StringBuilder cmd_str = new StringBuilder();

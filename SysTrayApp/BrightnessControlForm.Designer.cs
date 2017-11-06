@@ -30,6 +30,7 @@
         {
             this.pbBrightness = new System.Windows.Forms.ProgressBar();
             this.lBrightness = new System.Windows.Forms.Label();
+            this.cbColourTemperature = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // pbBrightness
@@ -50,11 +51,21 @@
             this.lBrightness.TabIndex = 1;
             this.lBrightness.Text = "0%";
             // 
+            // cbColourTemperature
+            // 
+            this.cbColourTemperature.FormattingEnabled = true;
+            this.cbColourTemperature.Location = new System.Drawing.Point(10, 41);
+            this.cbColourTemperature.Name = "cbColourTemperature";
+            this.cbColourTemperature.Size = new System.Drawing.Size(200, 21);
+            this.cbColourTemperature.TabIndex = 2;
+            this.cbColourTemperature.SelectedIndexChanged += new System.EventHandler(this.cbColourTemperature_SelectedIndexChanged);
+            // 
             // BrightnessControlForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(220, 45);
+            this.ClientSize = new System.Drawing.Size(220, 70);
+            this.Controls.Add(this.cbColourTemperature);
             this.Controls.Add(this.lBrightness);
             this.Controls.Add(this.pbBrightness);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -69,5 +80,6 @@
 
         private System.Windows.Forms.ProgressBar pbBrightness;
         private System.Windows.Forms.Label lBrightness;
+        private System.Windows.Forms.ComboBox cbColourTemperature;
     }
 }

@@ -13,19 +13,39 @@ namespace YeelightTray
     public partial class BrightnessControlForm : Form
     {
         private DeviceIO m_DeviceIO;
+        List<ColourTemp> CTList = new List<ColourTemp>();
         public BrightnessControlForm(Device device)
         {
             InitializeComponent();
             m_DeviceIO = new DeviceIO();
+
+            CTList.Add(new ColourTemp() { Name = "Cloudly sky (6500°K)", Value = 6500 });
+            CTList.Add(new ColourTemp() { Name = "Midday sun (5500°K)", Value = 5500 });
+            CTList.Add(new ColourTemp() { Name = "Moonlight (4000°K)", Value = 4000 });
+            CTList.Add(new ColourTemp() { Name = "Morning sun (3500°K)", Value = 3500 });
+            CTList.Add(new ColourTemp() { Name = "Lightbulb (3000°K)", Value = 3000 });
+            CTList.Add(new ColourTemp() { Name = "Sunrise (2500°K)", Value = 2500 });
+            CTList.Add(new ColourTemp() { Name = "Candele flame (1700°K)", Value = 1700 });
+
             if (m_DeviceIO.Connect(device) == true)
             {
                 //Apply current device values to controls
                 pbBrightness.Value = device.Brightness;
+
+                ColourTemp ct = CTList.Aggregate((x, y) => Math.Abs(x.Value - device.ColourTemperature) < Math.Abs(y.Value - device.ColourTemperature) ? x : y);
+                cbColourTemperature.DataSource = CTList;
+                cbColourTemperature.DisplayMember = "Name";
+                cbColourTemperature.ValueMember = "Value";
+                cbColourTemperature.DropDownStyle = ComboBoxStyle.DropDownList;
+
+                cbColourTemperature.SelectedItem = ct;
             }
 
             lBrightness.Text = pbBrightness.Value + "%";
-            this.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pbBrightness_MouseWheel);
-            this.LostFocus += new EventHandler(this.Event_LostFocus);
+            this.Activate();
+            this.MouseWheel += new MouseEventHandler(this.pbBrightness_MouseWheel);
+            this.Deactivate += new EventHandler(this.Event_Deactivate);
+            this.MouseDoubleClick += new MouseEventHandler(this.Event_Deactivate);
 
         }
 
@@ -46,9 +66,20 @@ namespace YeelightTray
         }
 
 
-        private void Event_LostFocus(object sender, EventArgs e)
+        private void Event_Deactivate(object sender, EventArgs e)
         {
             this.Dispose();
+        }
+
+        public class ColourTemp
+        {
+            public string Name { get; set; }
+            public int Value { get; set; }
+        }
+
+        private void cbColourTemperature_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            m_DeviceIO.SetColorTemperature((cbColourTemperature.SelectedItem as ColourTemp).Value, 500);
         }
     }
 }

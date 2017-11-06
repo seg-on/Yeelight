@@ -248,4 +248,6 @@ namespace YeelightTray
         }
 
     }
+
+
 }

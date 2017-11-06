@@ -183,7 +183,10 @@ namespace YeelightTray
                     string model = "";
                     Utils.GetSubString(response, "model: ", "\r\n", ref model);
 
-                    m_Bulbs.Add(new Device(ip, id, isOn, Convert.ToInt32(bright), model));
+                    string ct = "";
+                    Utils.GetSubString(response, "ct: ", "\r\n", ref ct);
+
+                    m_Bulbs.Add(new Device(ip, id, isOn, Convert.ToInt32(bright), model, Convert.ToInt32(ct)));
                 }
             }
         }
