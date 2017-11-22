@@ -101,6 +101,9 @@ namespace YeelightTray
 
             byte[] data = Encoding.ASCII.GetBytes(cmd_str.ToString());
             m_TcpClient.Client.Send(data);
+
+            //Apply Value
+            m_ConnectedBulb.ColourTemperature = value;
         }
 
         public void ExecCommand(string method, string param, int smooth)

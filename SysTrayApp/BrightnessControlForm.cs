@@ -14,6 +14,7 @@ namespace YeelightTray
     {
         private DeviceIO m_DeviceIO;
         List<ColourTemp> CTList = new List<ColourTemp>();
+        Device m_device;
         public BrightnessControlForm(Device device)
         {
             InitializeComponent();
@@ -40,7 +41,7 @@ namespace YeelightTray
 
                 cbColourTemperature.SelectedItem = ct;
             }
-
+            m_device = device;
             lBrightness.Text = pbBrightness.Value + "%";
             this.Activate();
             this.MouseWheel += new MouseEventHandler(this.pbBrightness_MouseWheel);

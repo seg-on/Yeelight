@@ -17,11 +17,13 @@ namespace YeelightTray
         private NotifyIcon trayIcon;
         private ContextMenu trayMenu;
         bool OnOff = true;
+        bool OffOnLock = false;
 
         private DevicesDiscovery m_DevicesDiscovery;
         private DeviceIO m_DeviceIO;
         private Device device;
         static Timer timerLock = new Timer();
+
         static Timer timerStatus = new Timer();
 
         public YeelightTray()
@@ -67,7 +69,7 @@ namespace YeelightTray
             process the timer event to the timer. */
             timerLock.Tick += new EventHandler(TimerLockEvent);
             // Sets the timer interval to 2 minutes.
-            timerLock.Interval = 120000;
+            timerLock.Interval = 12000;
 
             timerStatus.Tick += new EventHandler(TimerStatusEvent);
             timerStatus.Interval = 10000;
@@ -175,10 +177,11 @@ namespace YeelightTray
             }
             else if (e.Reason == SessionSwitchReason.SessionUnlock)
             {
-                if (OnOff)
+                if (OffOnLock)
                 {
                     trayIcon.Icon = Properties.Resources.yeelight_win_on;
                     m_DeviceIO.Toggle();
+                    OffOnLock = false;
                 }
             }
         }
@@ -186,10 +189,12 @@ namespace YeelightTray
         private void TimerLockEvent(Object myObject, EventArgs myEventArgs)
         {
             timerLock.Stop();
-
-            trayIcon.Icon = Properties.Resources.yeelight_win_off;
-            m_DeviceIO.Toggle();
-
+            if (OnOff)
+            {
+                trayIcon.Icon = Properties.Resources.yeelight_win_off;
+                m_DeviceIO.Toggle();
+                OffOnLock = true;
+            }
         }
 
         private void SunTime()
